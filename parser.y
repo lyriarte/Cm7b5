@@ -36,6 +36,7 @@ TERM			: FACTOR
 
 FACTOR		: INT
 			| '(' EXPRESSION ')'
+			| '-' FACTOR
 ;
 
 %%
