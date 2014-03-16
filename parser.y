@@ -14,27 +14,50 @@ int yywrap(void) {
   int integer;
 }
 
-%token INT
+%token <integer> INT
+%type <integer> EXPRESSION TERM FACTOR
 
 %%
 
 S			: EXPRESSION	
 	{
+		printf("%d\n",$1);
 		return(0);
 	}
 ;
 
 EXPRESSION	: TERM
+	{
+		$$ = $1;
+	}
 			| EXPRESSION '+' TERM 	
+	{
+		$$ = $1 + $3;
+	}
 			| EXPRESSION '-' TERM 	
+	{
+		$$ = $1 - $3;
+	}
 ;
 
 TERM			: FACTOR
+	{
+		$$ = $1;
+	}
 			| TERM '*' FACTOR 	
+	{
+		$$ = $1 * $3;
+	}
 			| TERM '/' FACTOR 	
+	{
+		$$ = $1 / $3;
+	}
 ;
 
 FACTOR		: INT
+	{
+		$$ = $1;
+	}
 ;
 
 %%
