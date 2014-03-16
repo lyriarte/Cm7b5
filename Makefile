@@ -1,7 +1,7 @@
-all : tokenizer
+all : rpn
 
-tokenizer : lex.yy.c definitions.h
-	gcc -o $@ lex.yy.c
+rpn : rpn.c lex.yy.c definitions.h
+	gcc -o $@ rpn.c lex.yy.c
 
 lex.yy.c : tokenizer.l
 	lex tokenizer.l
