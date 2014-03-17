@@ -1,7 +1,7 @@
-all : tokenizer
+all : recursive
 
-tokenizer : lex.yy.c definitions.h
-	gcc -o $@ lex.yy.c
+recursive : recursive.c lex.yy.c definitions.h
+	gcc -o $@ recursive.c lex.yy.c
 
 lex.yy.c : tokenizer.l
 	lex tokenizer.l
