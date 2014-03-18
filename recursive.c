@@ -26,7 +26,7 @@ EXPRESSION	: TERM
 			| TERM '-' EXPRESSION 	
 */
 int EXPRESSION(int * result) {
-	int err = -1;
+	int err = 0;
 	int right;
 	if (TERM(result))
 		return -1;
@@ -71,13 +71,21 @@ int TERM(int * result) {
 
 /*
 FACTOR		: INT
+			| '(' EXPRESSION ')'
 */
 int FACTOR(int * result) {
+	int err = -1;
 	if (lookahead(INT)) {
 		*result = yylval.integer;
 		return 0;
 	}
-	return -1;
+	if (lookahead('(')) {
+		if (err = EXPRESSION(result))
+			return err;
+	}
+	if (lookahead(')'))
+		return 0;
+	return err;
 }
 
 int main(void) {
