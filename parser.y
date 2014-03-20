@@ -14,7 +14,7 @@ int yywrap(void) {
   int integer;
 }
 
-%token INT
+%token <integer> INT
 
 %%
 
@@ -26,15 +26,30 @@ S			: EXPRESSION
 
 EXPRESSION	: TERM
 			| EXPRESSION '+' TERM 	
+	{
+		printf(" +");
+	}
 			| EXPRESSION '-' TERM 	
+	{
+		printf(" -");
+	}
 ;
 
 TERM			: FACTOR
 			| TERM '*' FACTOR 	
+	{
+		printf(" *");
+	}
 			| TERM '/' FACTOR 	
+	{
+		printf(" /");
+	}
 ;
 
 FACTOR		: INT
+	{
+		printf(" %d",$1);
+	}
 ;
 
 %%
