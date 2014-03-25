@@ -14,7 +14,7 @@ int yywrap(void) {
   int integer;
 }
 
-%token INT
+%token <integer> INT
 
 %%
 
@@ -26,21 +26,31 @@ S			: EXPRESSION
 
 EXPRESSION	: TERM
 			| EXPRESSION '+' TERM 	
+	{
+		gen_op32('+');
+	}
 			| EXPRESSION '-' TERM 	
+	{
+		gen_op32('-');
+	}
 ;
 
 TERM			: FACTOR
 			| TERM '*' FACTOR 	
+	{
+		gen_op32('*');
+	}
 			| TERM '/' FACTOR 	
+	{
+		gen_op32('/');
+	}
 ;
 
 FACTOR		: INT
+	{
+		gen_int($1);
+	}
 			| '(' EXPRESSION ')'
 ;
 
 %%
-
-main()
-{
-	yyparse();
-}

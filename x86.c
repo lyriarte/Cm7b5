@@ -39,22 +39,51 @@ dump4:\n\
     ret\n\
 \n"
 
-#define proc_main "\
+#define proc_main_start "\
 _start:\n\
+\n"
+
+#define proc_main_exit "\
 \n\
-    mov esi, 0XDEADF00D\n\
+    pop esi\n\
     call dump32\n\
     mov ebx, 0     ; exit code\n\
     mov eax, 1     ; sys_exit\n\
     int 0X80       ; call kernel\n\
 \n"
 
+void gen_int(int value) {
+  printf("    push %d\n", value);
+};
+
+void gen_op32(int op) {
+  printf("    pop ebx\n");
+  printf("    pop eax\n");
+  switch (op) {
+    case '+':
+      printf("    add eax, ebx\n");
+      break;
+    case '-':
+      printf("    sub eax, ebx\n");
+      break;
+    case '*':
+      printf("    imul eax, ebx\n");
+      break;
+    case '/':
+      printf("    idiv eax, ebx\n");
+      break;
+  }
+  printf("    push eax\n");
+};
+
 int main()
 {
   printf(section_text);
   printf(section_data);
   printf(proc_dump32);
-  printf(proc_main);
+  printf(proc_main_start);
+  yyparse();
+  printf(proc_main_exit);
   return 0;
 }
   
