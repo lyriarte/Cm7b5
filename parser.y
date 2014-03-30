@@ -20,11 +20,18 @@ int yywrap(void) {
 
 %%
 
-S			: ASSIGNMENT	
+S			: STATEMENT	
 	{
 		return(0);
 	}
 ;
+
+STATEMENT	: ';'
+			| ASSIGNMENT ';'
+			| '{' STATEMENT_LIST '}'
+
+STATEMENT_LIST : STATEMENT
+			| STATEMENT_LIST STATEMENT
 
 ASSIGNMENT	: IDENT '=' EXPRESSION
 
