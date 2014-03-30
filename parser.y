@@ -52,6 +52,9 @@ FACTOR		: INT
 	}
 			| '(' EXPRESSION ')'
 			| '-' FACTOR
+	{
+		gen_negative();
+	}
 ;
 
 %%

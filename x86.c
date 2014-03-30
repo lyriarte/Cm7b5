@@ -76,6 +76,13 @@ void gen_op32(int op) {
   printf("    push eax\n");
 };
 
+void gen_negative() {
+  printf("    pop ebx\n");
+  printf("    mov eax, 0\n");
+  printf("    sub eax, ebx\n");
+  printf("    push eax\n");
+};
+
 int main()
 {
   printf(section_text);
