@@ -51,6 +51,7 @@ FACTOR		: INT
 		gen_int($1);
 	}
 			| '(' EXPRESSION ')'
+			| '-' FACTOR
 ;
 
 %%
