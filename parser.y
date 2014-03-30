@@ -12,17 +12,21 @@ int yywrap(void) {
 
 %union {
   int integer;
+  char * identifier;
 }
 
 %token INT
+%token IDENT
 
 %%
 
-S			: EXPRESSION	
+S			: ASSIGNMENT	
 	{
 		return(0);
 	}
 ;
+
+ASSIGNMENT	: IDENT '=' EXPRESSION
 
 EXPRESSION	: TERM
 			| EXPRESSION '+' TERM 	
@@ -35,6 +39,7 @@ TERM			: FACTOR
 ;
 
 FACTOR		: INT
+			| IDENT
 			| '(' EXPRESSION ')'
 			| '-' FACTOR
 ;
