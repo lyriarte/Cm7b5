@@ -12,17 +12,28 @@ int yywrap(void) {
 
 %union {
   int integer;
+  char * identifier;
 }
 
 %token <integer> INT
+%token IDENT
 
 %%
 
-S			: EXPRESSION	
+S			: STATEMENT	
 	{
 		return(0);
 	}
 ;
+
+STATEMENT	: ';'
+			| ASSIGNMENT ';'
+			| '{' STATEMENT_LIST '}'
+
+STATEMENT_LIST : STATEMENT
+			| STATEMENT_LIST STATEMENT
+
+ASSIGNMENT	: IDENT '=' EXPRESSION
 
 EXPRESSION	: TERM
 			| EXPRESSION '+' TERM 	
@@ -50,6 +61,7 @@ FACTOR		: INT
 	{
 		gen_int($1);
 	}
+			| IDENT
 			| '(' EXPRESSION ')'
 			| '-' FACTOR
 	{
