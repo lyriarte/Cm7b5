@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define section_text "\
 section .text\n\
@@ -46,62 +47,86 @@ _start:\n\
 
 #define proc_main_exit "\
 \n\
-    pop esi\n\
-    call dump32\n\
+;    pop esi\n\
+;    call dump32\n\
     mov ebx, 0     ; exit code\n\
     mov eax, 1     ; sys_exit\n\
     int 0X80       ; call kernel\n\
 \n"
 
+
+#ifndef DATA_SIZE
+#define DATA_SIZE 4096
+#endif
+static char data_buf[DATA_SIZE];
+
+#ifndef CODE_SIZE
+#define CODE_SIZE 65536
+#endif
+static char code_buf[CODE_SIZE];
+
+static char temp_buf[256];
+
 void gen_int(int value) {
-  printf("    push %d\n", value);
+  sprintf(temp_buf,"    push %d\n", value);
+  strcat(code_buf, temp_buf);
 };
 
 void gen_intvar(char * name) {
-  printf("    push dword [%s]\n", name);
+  sprintf(temp_buf,"    push dword [%s]\n", name);
   free(name);
+  strcat(code_buf, temp_buf);
 };
 
 void assign_intvar(char * name) {
-  printf("    pop dword [%s]\n", name);
+  sprintf(temp_buf,"    pop dword [%s]\n", name);
   free(name);
+  strcat(code_buf, temp_buf);
 };
 
 void gen_op32(int op) {
-  printf("    pop ebx\n");
-  printf("    pop eax\n");
+  strcat(code_buf, "    pop ebx\n");
+  strcat(code_buf, "    pop eax\n");
   switch (op) {
     case '+':
-      printf("    add eax, ebx\n");
+      strcat(code_buf, "    add eax, ebx\n");
       break;
     case '-':
-      printf("    sub eax, ebx\n");
+      strcat(code_buf, "    sub eax, ebx\n");
       break;
     case '*':
-      printf("    imul eax, ebx\n");
+      strcat(code_buf, "    imul eax, ebx\n");
       break;
     case '/':
-      printf("    idiv eax, ebx\n");
+      strcat(code_buf, "    idiv eax, ebx\n");
       break;
   }
-  printf("    push eax\n");
+  strcat(code_buf, "    push eax\n");
 };
 
 void gen_negative() {
-  printf("    pop ebx\n");
-  printf("    mov eax, 0\n");
-  printf("    sub eax, ebx\n");
-  printf("    push eax\n");
+  strcat(code_buf, "    pop ebx\n");
+  strcat(code_buf, "    mov eax, 0\n");
+  strcat(code_buf, "    sub eax, ebx\n");
+  strcat(code_buf, "    push eax\n");
+};
+
+void declare_intvar(char * name) {
+  sprintf(temp_buf,"%s dd 0xffffffff\n", name);
+  free(name);
+  strcat(data_buf, temp_buf);
 };
 
 int main()
 {
   printf(section_text);
-  printf(section_data);
-  printf(proc_dump32);
-  printf(proc_main_start);
+  strcpy(data_buf, section_data);
+  strcpy(code_buf, proc_dump32);
+  strcat(code_buf, proc_main_start);
   yyparse();
-  printf(proc_main_exit);
+  strcat(code_buf, proc_main_exit);
+  printf("%s\n",data_buf);
+  printf("%s\n",code_buf);
   return 0;
 }
   
