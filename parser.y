@@ -16,7 +16,7 @@ int yywrap(void) {
 }
 
 %token <integer> INT
-%token IDENT
+%token <identifier> IDENT
 %token TYPE_INT
 
 %%
@@ -46,6 +46,9 @@ STATEMENT_LIST : STATEMENT
 VARIABLE	: TYPE_INT IDENT
 
 ASSIGNMENT	: IDENT '=' EXPRESSION
+	{
+		assign_intvar($1);
+	}
 
 EXPRESSION	: TERM
 			| EXPRESSION '+' TERM 	
@@ -74,6 +77,9 @@ FACTOR		: INT
 		gen_int($1);
 	}
 			| IDENT
+	{
+		gen_intvar($1);
+	}
 			| '(' EXPRESSION ')'
 			| '-' FACTOR
 	{

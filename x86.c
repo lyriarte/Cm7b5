@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #define section_text "\
 section .text\n\
@@ -54,6 +55,16 @@ _start:\n\
 
 void gen_int(int value) {
   printf("    push %d\n", value);
+};
+
+void gen_intvar(char * name) {
+  printf("    push dword [%s]\n", name);
+  free(name);
+};
+
+void assign_intvar(char * name) {
+  printf("    pop dword [%s]\n", name);
+  free(name);
 };
 
 void gen_op32(int op) {
