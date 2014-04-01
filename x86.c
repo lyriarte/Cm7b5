@@ -11,7 +11,7 @@ section .text\n\
 #define section_data "\
 section .data\n\
 \n\
-buf times 64 db 0\n\
+buf times 64 db 0xA\n\
 \n"
 
 #define proc_dump32 "\
@@ -33,7 +33,7 @@ dump4:\n\
     dec ebx\n\
     jnz loop8\n\
 \n\
-    mov edx, 8     ; arg3 len\n\
+    mov edx, 9     ; arg3 len\n\
     mov ecx, buf   ; arg2 ptr\n\
     mov ebx, 1     ; arg1 stdio\n\
     mov eax, 4     ; sys_write\n\
@@ -47,8 +47,6 @@ _start:\n\
 
 #define proc_main_exit "\
 \n\
-;    pop esi\n\
-;    call dump32\n\
     mov ebx, 0     ; exit code\n\
     mov eax, 1     ; sys_exit\n\
     int 0X80       ; call kernel\n\
@@ -56,16 +54,17 @@ _start:\n\
 
 
 #ifndef DATA_SIZE
-#define DATA_SIZE 4096
+#define DATA_SIZE 16384
 #endif
 static char data_buf[DATA_SIZE];
+static char dump_buf[DATA_SIZE];
 
 #ifndef CODE_SIZE
 #define CODE_SIZE 65536
 #endif
 static char code_buf[CODE_SIZE];
 
-static char temp_buf[256];
+static char temp_buf[1024];
 
 void gen_int(int value) {
   sprintf(temp_buf,"    push %d\n", value);
@@ -113,8 +112,15 @@ void gen_negative() {
 
 void declare_intvar(char * name) {
   sprintf(temp_buf,"%s dd 0xffffffff\n", name);
-  free(name);
   strcat(data_buf, temp_buf);
+  sprintf(temp_buf,"%s_dbg db \"%s: 0x\"\n", name, name);
+  strcat(data_buf, temp_buf);
+  sprintf(temp_buf,"mov edx, %d\nmov ecx, %s_dbg\nmov ebx, 1\nmov eax, 4\nint 0x80\n",
+    strlen(name) + 4,  name);
+  strcat(dump_buf, temp_buf);
+  sprintf(temp_buf,"mov esi, dword [%s]\ncall dump32\n", name);
+  strcat(dump_buf, temp_buf);
+  free(name);
 };
 
 int main()
@@ -123,10 +129,12 @@ int main()
   strcpy(data_buf, section_data);
   strcpy(code_buf, proc_dump32);
   strcat(code_buf, proc_main_start);
+  strcpy(dump_buf,"");
   yyparse();
-  strcat(code_buf, proc_main_exit);
   printf("%s\n",data_buf);
   printf("%s\n",code_buf);
+  printf("%s\n",dump_buf);
+  printf("%s\n",proc_main_exit);
   return 0;
 }
   
