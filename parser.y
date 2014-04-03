@@ -8,6 +8,10 @@ void yyerror(char *s) {
 int yywrap(void) {
 	return 1;
 }
+
+int jmpstack[64];
+int jmptop = -1;
+int jmpcnt = 0;
 %}
 
 %union {
@@ -41,18 +45,49 @@ DECLARATION_LIST : DECLARATION
 
 STATEMENT	: ';'
 			| ASSIGNMENT ';'
-			| WHILE '(' CONDITION ')' BLOC
+			| WHILE_BEGIN '(' CONDITION ')' BLOC
+	{
+		gen_jmp("begin", jmpstack[jmptop]);
+		gen_label("end", jmpstack[jmptop--]);
+	}
+			
+WHILE_BEGIN	: WHILE
+	{
+		jmpstack[++jmptop] = ++jmpcnt;
+		gen_label("begin", jmpstack[jmptop]);
+	}
 
 STATEMENT_LIST : STATEMENT
 			| STATEMENT_LIST STATEMENT
 			
 CONDITION	: EXPRESSION
+	{
+		gen_jmpcond32(0  , "end", jmpstack[jmptop]);
+	}
 			| EXPRESSION EQ  EXPRESSION
+	{
+		gen_jmpcond32(NE , "end", jmpstack[jmptop]);
+	}
 			| EXPRESSION NE  EXPRESSION
+	{
+		gen_jmpcond32(EQ , "end", jmpstack[jmptop]);
+	}
 			| EXPRESSION LE  EXPRESSION
+	{
+		gen_jmpcond32('>', "end", jmpstack[jmptop]);
+	}
 			| EXPRESSION GE  EXPRESSION
+	{
+		gen_jmpcond32('<', "end", jmpstack[jmptop]);
+	}
 			| EXPRESSION '<' EXPRESSION
+	{
+		gen_jmpcond32(GE , "end", jmpstack[jmptop]);
+	}
 			| EXPRESSION '>' EXPRESSION
+	{
+		gen_jmpcond32(LE , "end", jmpstack[jmptop]);
+	}
 
 VARIABLE	: TYPE_INT IDENT
 	{

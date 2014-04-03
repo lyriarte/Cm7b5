@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "y.tab.h"
+
 #define section_text "\
 section .text\n\
 \n\
@@ -109,6 +111,48 @@ void gen_negative() {
   strcat(code_buf, "    sub eax, ebx\n");
   strcat(code_buf, "    push eax\n");
 };
+
+void gen_jmp(char * prefix, int jmpto) {
+  sprintf(temp_buf, "    jmp  %s%04d\n", prefix, jmpto);
+  strcat(code_buf, temp_buf);
+};
+  
+void gen_jmpcond32(int op, char * prefix, int jmpto) {
+  if (op == 0) {
+    strcat(code_buf, "    mov ebx, 0\n");
+    op = EQ;
+  }
+  else
+    strcat(code_buf, "    pop ebx\n");
+  strcat(code_buf, "    pop eax\n");
+  strcat(code_buf, "    cmp eax, ebx\n");
+  switch (op) {
+    case EQ:
+      sprintf(temp_buf, "    je  %s%04d\n", prefix, jmpto);
+      break;
+    case NE:
+      sprintf(temp_buf, "    jne %s%04d\n", prefix, jmpto);
+      break;
+    case LE:
+      sprintf(temp_buf, "    jle %s%04d\n", prefix, jmpto);
+      break;
+    case GE:
+      sprintf(temp_buf, "    jge %s%04d\n", prefix, jmpto);
+      break;
+    case '<':
+      sprintf(temp_buf, "    jl  %s%04d\n", prefix, jmpto);
+      break;
+    case '>':
+      sprintf(temp_buf, "    jg  %s%04d\n", prefix, jmpto);
+      break;
+  }
+  strcat(code_buf, temp_buf);
+};
+
+void gen_label(char * prefix, int jmpto) {
+  sprintf(temp_buf, "%s%04d:\n", prefix, jmpto);
+  strcat(code_buf, temp_buf);
+}
 
 void declare_intvar(char * name) {
   sprintf(temp_buf,"%s dd 0xffffffff\n", name);
