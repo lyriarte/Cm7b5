@@ -20,6 +20,7 @@ int yywrap(void) {
 %token TYPE_INT
 %token EQ NE LE GE
 %token WHILE
+%token IF ELSE
 
 %%
 
@@ -42,6 +43,8 @@ DECLARATION_LIST : DECLARATION
 STATEMENT	: ';'
 			| ASSIGNMENT ';'
 			| WHILE '(' CONDITION ')' BLOC
+			| IF '(' CONDITION ')' BLOC
+			| IF '(' CONDITION ')' BLOC ELSE BLOC
 
 STATEMENT_LIST : STATEMENT
 			| STATEMENT_LIST STATEMENT

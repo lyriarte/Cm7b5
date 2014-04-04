@@ -13,6 +13,14 @@ while		{
 				return(WHILE);
 			}
 
+if			{
+				return(IF);
+			}
+
+else		{
+				return(ELSE);
+			}
+
 [0-9]+		{
 				sscanf(yytext,"%d",&yylval.integer);
 				return(INT);
