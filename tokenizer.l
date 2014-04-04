@@ -5,6 +5,10 @@
 
 %%
 
+int			{
+				return(TYPE_INT);
+			}
+
 [0-9]+		{
 				sscanf(yytext,"%d",&yylval.integer);
 				return(INT);
