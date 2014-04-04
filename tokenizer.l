@@ -11,6 +11,10 @@ int			{
 				return(TYPE_INT);
 			}
 
+while		{
+				return(WHILE);
+			}
+
 [0-9]+		{
 				sscanf(yytext,"%d",&yylval.integer);
 				return(INT);
@@ -21,7 +25,23 @@ int			{
 				return(IDENT);
 			}
 
-[\+\-\*\/\(\)\=\;\{\}]	{
+\=\=			{
+				return(EQ);
+			}
+
+\!\=			{
+				return(NE);
+			}
+
+\<\=			{
+				return(LE);
+			}
+
+\>\=			{
+				return(GE);
+			}
+
+[\+\-\*\/\(\)\=\;\{\}\<\>]	{
 				return(*yytext);
 			}
 
