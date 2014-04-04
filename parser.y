@@ -24,6 +24,7 @@ int jmpcnt = 0;
 %token TYPE_INT
 %token EQ NE LE GE
 %token WHILE
+%token IF ELSE
 
 %%
 
@@ -50,6 +51,8 @@ STATEMENT	: ';'
 		gen_jmp("begin", jmpstack[jmptop]);
 		gen_label("end", jmpstack[jmptop--]);
 	}
+			| IF '(' CONDITION ')' BLOC
+			| IF '(' CONDITION ')' BLOC ELSE BLOC
 			
 WHILE_BEGIN	: WHILE
 	{
