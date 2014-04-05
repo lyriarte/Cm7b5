@@ -51,13 +51,31 @@ STATEMENT	: ';'
 		gen_jmp("begin", jmpstack[jmptop]);
 		gen_label("end", jmpstack[jmptop--]);
 	}
-			| IF '(' CONDITION ')' BLOC
-			| IF '(' CONDITION ')' BLOC ELSE BLOC
-			
+			| IF_BEGIN '(' CONDITION ')' BLOC
+	{
+		gen_label("end", jmpstack[jmptop--]);
+	}
+
+			| IF_COND_BLOC_ELSE BLOC
+	{
+		gen_label("final", jmpstack[jmptop--]);
+	}
+
 WHILE_BEGIN	: WHILE
 	{
 		jmpstack[++jmptop] = ++jmpcnt;
 		gen_label("begin", jmpstack[jmptop]);
+	}
+
+IF_BEGIN	: IF
+	{
+		jmpstack[++jmptop] = ++jmpcnt;
+	}
+
+IF_COND_BLOC_ELSE	: IF_BEGIN '(' CONDITION ')' BLOC ELSE
+	{
+		gen_jmp("final", jmpstack[jmptop]);
+		gen_label("end", jmpstack[jmptop]);
 	}
 
 STATEMENT_LIST : STATEMENT
