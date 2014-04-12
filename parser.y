@@ -21,6 +21,7 @@ int yywrap(void) {
 %token EQ NE LE GE
 %token WHILE
 %token IF ELSE
+%token RETURN
 
 %%
 
@@ -42,6 +43,7 @@ DECLARATION_LIST : DECLARATION
 
 STATEMENT	: ';'
 			| ASSIGNMENT ';'
+			| RETURN EXPRESSION ';'
 			| WHILE '(' CONDITION ')' BLOC
 			| IF '(' CONDITION ')' BLOC
 			| IF '(' CONDITION ')' BLOC ELSE BLOC

@@ -21,6 +21,10 @@ else		{
 				return(ELSE);
 			}
 
+return		{
+				return(RETURN);
+			}
+
 [0-9]+		{
 				sscanf(yytext,"%d",&yylval.integer);
 				return(INT);
