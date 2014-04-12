@@ -25,11 +25,13 @@ int yywrap(void) {
 
 %%
 
-S			: BLOC	
+S			: FUNCTION	
 	{
 		return(0);
 	}
 ;
+
+FUNCTION		: TYPE_INT IDENT '(' VARIABLE_LIST ')' BLOC
 
 BLOC			: '{' '}'
 			| '{' STATEMENT_LIST '}'
@@ -61,6 +63,9 @@ CONDITION	: EXPRESSION
 
 VARIABLE	: TYPE_INT IDENT
 
+VARIABLE_LIST : VARIABLE
+			| VARIABLE_LIST ',' VARIABLE
+			
 ASSIGNMENT	: IDENT '=' EXPRESSION
 
 EXPRESSION	: TERM
