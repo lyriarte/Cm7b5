@@ -25,14 +25,17 @@ int jmpcnt = 0;
 %token EQ NE LE GE
 %token WHILE
 %token IF ELSE
+%token RETURN
 
 %%
 
-S			: BLOC	
+S			: FUNCTION	
 	{
 		return(0);
 	}
 ;
+
+FUNCTION		: TYPE_INT IDENT '(' VARIABLE_LIST ')' BLOC
 
 BLOC			: '{' '}'
 			| '{' STATEMENT_LIST '}'
@@ -46,6 +49,7 @@ DECLARATION_LIST : DECLARATION
 
 STATEMENT	: ';'
 			| ASSIGNMENT ';'
+			| RETURN EXPRESSION ';'
 			| WHILE_BEGIN '(' CONDITION ')' BLOC
 	{
 		gen_jmp("begin", jmpstack[jmptop]);
@@ -116,6 +120,9 @@ VARIABLE	: TYPE_INT IDENT
 	}
 
 
+VARIABLE_LIST : VARIABLE
+			| VARIABLE_LIST ',' VARIABLE
+			
 ASSIGNMENT	: IDENT '=' EXPRESSION
 	{
 		assign_intvar($1);
