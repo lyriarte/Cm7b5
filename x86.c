@@ -45,7 +45,13 @@ dump4:\n\
 
 #define proc_main_start "\
 _start:\n\
+    push ebp\n\
+    mov  ebp, esp\n\
 \n"
+
+#define proc_dump_var "\
+    pop esi\n\
+    call dump32\n"
 
 #define proc_main_exit "\
 \n\
@@ -56,17 +62,29 @@ _start:\n\
 
 
 #ifndef DATA_SIZE
-#define DATA_SIZE 16384
+#define DATA_SIZE 4096
 #endif
 static char data_buf[DATA_SIZE];
-static char dump_buf[DATA_SIZE];
 
 #ifndef CODE_SIZE
 #define CODE_SIZE 65536
 #endif
 static char code_buf[CODE_SIZE];
 
-static char temp_buf[1024];
+static char temp_buf[256];
+
+static char * varstack[64];
+static int vartop = -1;
+
+int var_index(char * name) {
+  int i=0;
+  while (i<=vartop) {
+    if (!strcmp(varstack[i], name))
+      return i;
+    i++;
+  }
+  return -1;
+}
 
 void gen_int(int value) {
   sprintf(temp_buf,"    push %d\n", value);
@@ -74,13 +92,23 @@ void gen_int(int value) {
 };
 
 void gen_intvar(char * name) {
-  sprintf(temp_buf,"    push dword [%s]\n", name);
+  int i = var_index(name);
+  if (i < 0) {
+    yyerror(name);
+    exit -1;
+  } 
+  sprintf(temp_buf,"    push dword [ebp-%02d] ; %s\n", 4*(i+1), name);
   free(name);
   strcat(code_buf, temp_buf);
 };
 
 void assign_intvar(char * name) {
-  sprintf(temp_buf,"    pop dword [%s]\n", name);
+  int i = var_index(name);
+  if (i < 0) {
+    yyerror(name);
+    exit -1;
+  } 
+  sprintf(temp_buf,"    pop dword [ebp-%02d] ; %s\n", 4*(i+1), name);
   free(name);
   strcat(code_buf, temp_buf);
 };
@@ -155,30 +183,26 @@ void gen_label(char * prefix, int jmpto) {
 }
 
 void declare_intvar(char * name) {
-  sprintf(temp_buf,"%s dd 0xffffffff\n", name);
-  strcat(data_buf, temp_buf);
-  sprintf(temp_buf,"%s_dbg db \"%s: 0x\"\n", name, name);
-  strcat(data_buf, temp_buf);
-  sprintf(temp_buf,"mov edx, %d\nmov ecx, %s_dbg\nmov ebx, 1\nmov eax, 4\nint 0x80\n",
-    strlen(name) + 4,  name);
-  strcat(dump_buf, temp_buf);
-  sprintf(temp_buf,"mov esi, dword [%s]\ncall dump32\n", name);
-  strcat(dump_buf, temp_buf);
-  free(name);
+  sprintf(temp_buf,"    push 0xffffffff ; %s\n", name);
+  strcat(code_buf, temp_buf);
+  varstack[++vartop] = name;
 };
 
 int main()
 {
+  int i;
   printf(section_text);
   strcpy(data_buf, section_data);
   strcpy(code_buf, proc_dump32);
   strcat(code_buf, proc_main_start);
-  strcpy(dump_buf,"");
   yyparse();
+  for (i=0; i<=vartop; i++) {
+    strcat(code_buf, proc_dump_var);
+    free(varstack[i]);
+  }
+  strcat(code_buf, proc_main_exit);
   printf("%s\n",data_buf);
   printf("%s\n",code_buf);
-  printf("%s\n",dump_buf);
-  printf("%s\n",proc_main_exit);
   return 0;
 }
   
