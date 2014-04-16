@@ -88,5 +88,6 @@ FACTOR		: INT
 
 main()
 {
+	yydebug=1;
 	yyparse();
 }
