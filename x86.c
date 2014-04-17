@@ -43,17 +43,12 @@ dump4:\n\
     ret\n\
 \n"
 
-#define proc_main_start "\
+#define proc_main "\
 _start:\n\
-    push ebp\n\
-    mov  ebp, esp\n\
-\n"
-
-#define proc_dump_var "\
-    pop esi\n\
-    call dump32\n"
-
-#define proc_main_exit "\
+    call function_main\n\
+\n\
+    mov esi, eax\n\
+    call dump32\n\
 \n\
     mov ebx, 0     ; exit code\n\
     mov eax, 1     ; sys_exit\n\
@@ -75,11 +70,14 @@ static char temp_buf[256];
 
 static char * varstack[64];
 static int vartop = -1;
+static char * argstack[16];
+static int argtop = -1;
+static char * current_function;
 
-int var_index(char * name) {
+int stack_index(char * name, char * stack[], int top) {
   int i=0;
-  while (i<=vartop) {
-    if (!strcmp(varstack[i], name))
+  while (i<=top) {
+    if (!strcmp(stack[i], name))
       return i;
     i++;
   }
@@ -92,23 +90,33 @@ void gen_int(int value) {
 };
 
 void gen_intvar(char * name) {
-  int i = var_index(name);
-  if (i < 0) {
-    yyerror(name);
-    exit -1;
+  int i = stack_index(name, varstack, vartop);
+  if (i >= 0)
+    sprintf(temp_buf,"    push dword [ebp-%02d] ; %s\n", 4*(i+1), name);
+  else {
+    i = stack_index(name, argstack, argtop);
+    if (i < 0) {
+      yyerror(name);
+      exit -1;
+    }
+    sprintf(temp_buf,"    push dword [ebp+%02d] ; %s\n", 4*(i+2), name);
   } 
-  sprintf(temp_buf,"    push dword [ebp-%02d] ; %s\n", 4*(i+1), name);
   free(name);
   strcat(code_buf, temp_buf);
 };
 
 void assign_intvar(char * name) {
-  int i = var_index(name);
-  if (i < 0) {
-    yyerror(name);
-    exit -1;
+  int i = stack_index(name, varstack, vartop);
+  if (i >= 0)
+    sprintf(temp_buf,"    pop dword [ebp-%02d] ; %s\n", 4*(i+1), name);
+  else {
+    i = stack_index(name, argstack, argtop);
+    if (i < 0) {
+      yyerror(name);
+      exit -1;
+    }
+    sprintf(temp_buf,"    pop dword [ebp+%02d] ; %s\n", 4*(i+2), name);
   } 
-  sprintf(temp_buf,"    pop dword [ebp-%02d] ; %s\n", 4*(i+1), name);
   free(name);
   strcat(code_buf, temp_buf);
 };
@@ -177,6 +185,12 @@ void gen_jmpcond32(int op, char * prefix, int jmpto) {
   strcat(code_buf, temp_buf);
 };
 
+void gen_return() {
+  strcat(code_buf, "    pop  eax\n");
+  sprintf(temp_buf, "    jmp function_%s_end\n", current_function);
+  strcat(code_buf, temp_buf);
+}
+
 void gen_label(char * prefix, int jmpto) {
   sprintf(temp_buf, "%s%04d:\n", prefix, jmpto);
   strcat(code_buf, temp_buf);
@@ -188,19 +202,45 @@ void declare_intvar(char * name) {
   varstack[++vartop] = name;
 };
 
+void declare_intarg(char * name) {
+  argstack[++argtop] = name;
+}
+
+void begin_func(char * name) {
+  current_function = name;
+  sprintf(temp_buf,"function_%s:\n", name);
+  strcat(code_buf, temp_buf);
+  strcat(code_buf, "    push ebp\n");
+  strcat(code_buf, "    mov  ebp, esp\n");
+//strcat(code_buf, "    push ebx\n");
+//strcat(code_buf, "    push edi\n");
+//strcat(code_buf, "    push esi\n");
+}
+
+void end_func() {
+  int i;
+  sprintf(temp_buf,"function_%s_end:\n", current_function);
+  free(current_function);
+  for (i=0; i<vartop; i++)
+    free(varstack[i]);
+  for (i=0; i<argtop; i++)
+    free(argstack[i]);
+  strcat(code_buf, temp_buf);
+//strcat(code_buf, "    pop  esi\n");
+//strcat(code_buf, "    pop  edi\n");
+//strcat(code_buf, "    pop  ebx\n");
+  strcat(code_buf, "    mov  esp, ebp\n");
+  strcat(code_buf, "    pop  ebp\n");
+  strcat(code_buf, "    ret\n");
+}
+
 int main()
 {
-  int i;
   printf(section_text);
   strcpy(data_buf, section_data);
   strcpy(code_buf, proc_dump32);
-  strcat(code_buf, proc_main_start);
+  strcat(code_buf, proc_main);
   yyparse();
-  for (i=0; i<=vartop; i++) {
-    strcat(code_buf, proc_dump_var);
-    free(varstack[i]);
-  }
-  strcat(code_buf, proc_main_exit);
   printf("%s\n",data_buf);
   printf("%s\n",code_buf);
   return 0;

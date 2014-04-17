@@ -26,6 +26,7 @@ int jmpcnt = 0;
 %token WHILE
 %token IF ELSE
 %token RETURN
+%type <identifier> VARIABLE
 
 %%
 
@@ -35,7 +36,19 @@ S			: FUNCTION
 	}
 ;
 
-FUNCTION		: TYPE_INT IDENT '(' VARIABLE_LIST ')' BLOC
+FUNCTION		: FUNC_DECL ')' BLOC
+	{
+		end_func();
+	}
+			| FUNC_DECL VARIABLE_LIST ')' BLOC
+	{
+		end_func();
+	}
+
+FUNC_DECL	: TYPE_INT IDENT '('
+	{
+		begin_func($2);
+	}
 
 BLOC			: '{' '}'
 			| '{' STATEMENT_LIST '}'
@@ -43,6 +56,9 @@ BLOC			: '{' '}'
 			| '{' DECLARATION_LIST STATEMENT_LIST '}'
 
 DECLARATION	: VARIABLE ';'
+	{
+		declare_intvar($1);
+	}
 
 DECLARATION_LIST : DECLARATION
 			| DECLARATION_LIST DECLARATION
@@ -50,6 +66,9 @@ DECLARATION_LIST : DECLARATION
 STATEMENT	: ';'
 			| ASSIGNMENT ';'
 			| RETURN EXPRESSION ';'
+	{
+		gen_return();
+	}
 			| WHILE_BEGIN '(' CONDITION ')' BLOC
 	{
 		gen_jmp("begin", jmpstack[jmptop]);
@@ -59,7 +78,6 @@ STATEMENT	: ';'
 	{
 		gen_label("end", jmpstack[jmptop--]);
 	}
-
 			| IF_COND_BLOC_ELSE BLOC
 	{
 		gen_label("final", jmpstack[jmptop--]);
@@ -116,12 +134,17 @@ CONDITION	: EXPRESSION
 
 VARIABLE	: TYPE_INT IDENT
 	{
-		declare_intvar($2);
+		$$ = $2;
 	}
 
-
 VARIABLE_LIST : VARIABLE
+	{
+		declare_intarg($1);
+	}
 			| VARIABLE_LIST ',' VARIABLE
+	{
+		declare_intarg($3);
+	}
 			
 ASSIGNMENT	: IDENT '=' EXPRESSION
 	{
