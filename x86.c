@@ -234,6 +234,19 @@ void end_func() {
   strcat(code_buf, "    ret\n");
 }
 
+void gen_call(char * name, int nargs) {
+  sprintf(temp_buf, "    call function_%s\n", name);
+  strcat(code_buf, temp_buf);
+  if (nargs) {
+    sprintf(temp_buf, "    add esp, %d ; drop %d args\n", nargs * 4, nargs);
+    strcat(code_buf, temp_buf);
+  }
+}
+
+void gen_callresult() {
+  strcat(code_buf, "    push eax\n");
+}
+
 int main()
 {
   printf(section_text);

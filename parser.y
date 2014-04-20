@@ -27,6 +27,7 @@ int jmpcnt = 0;
 %token IF ELSE
 %token RETURN
 %type <identifier> VARIABLE
+%type <integer> EXPRESSION_LIST
 
 %%
 
@@ -156,11 +157,23 @@ ASSIGNMENT	: IDENT '=' EXPRESSION
 	}
 
 FUNC_CALL	: IDENT '(' ')'
+	{
+		gen_call($1, 0);
+	}
 			| IDENT '(' EXPRESSION_LIST ')' 	
+	{
+		gen_call($1, $3);
+	}
 
 EXPRESSION_LIST : EXPRESSION
+	{
+		$$ = 1;
+	}
 			| EXPRESSION_LIST ',' EXPRESSION
-			
+	{
+		$$ = 1 + $1;
+	}
+
 EXPRESSION	: TERM
 			| EXPRESSION '+' TERM 	
 	{
@@ -192,6 +205,9 @@ FACTOR		: INT
 		gen_intvar($1);
 	}
 			| FUNC_CALL
+	{
+		gen_callresult();
+	}
 			| '(' EXPRESSION ')'
 			| '-' FACTOR
 	{
