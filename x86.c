@@ -99,7 +99,7 @@ void gen_intvar(char * name) {
       yyerror(name);
       exit -1;
     }
-    sprintf(temp_buf,"    push dword [ebp+%02d] ; %s\n", 4*(i+2), name);
+    sprintf(temp_buf,"    push dword [ebp+%02d] ; %s\n", 4*(argtop-i+2), name);
   } 
   free(name);
   strcat(code_buf, temp_buf);
@@ -115,7 +115,7 @@ void assign_intvar(char * name) {
       yyerror(name);
       exit -1;
     }
-    sprintf(temp_buf,"    pop dword [ebp+%02d] ; %s\n", 4*(i+2), name);
+    sprintf(temp_buf,"    pop dword [ebp+%02d] ; %s\n", 4*(argtop-i+2), name);
   } 
   free(name);
   strcat(code_buf, temp_buf);
