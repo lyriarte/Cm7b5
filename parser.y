@@ -30,7 +30,7 @@ int jmpcnt = 0;
 
 %%
 
-S			: FUNCTION	
+S			: FUNCTION_LIST
 	{
 		return(0);
 	}
@@ -50,6 +50,9 @@ FUNC_DECL	: TYPE_INT IDENT '('
 		begin_func($2);
 	}
 
+FUNCTION_LIST : FUNCTION
+			| FUNCTION_LIST FUNCTION
+
 BLOC			: '{' '}'
 			| '{' STATEMENT_LIST '}'
 			| '{' DECLARATION_LIST '}'
@@ -65,6 +68,7 @@ DECLARATION_LIST : DECLARATION
 
 STATEMENT	: ';'
 			| ASSIGNMENT ';'
+			| FUNC_CALL ';'
 			| RETURN EXPRESSION ';'
 	{
 		gen_return();
@@ -151,6 +155,12 @@ ASSIGNMENT	: IDENT '=' EXPRESSION
 		assign_intvar($1);
 	}
 
+FUNC_CALL	: IDENT '(' ')'
+			| IDENT '(' EXPRESSION_LIST ')' 	
+
+EXPRESSION_LIST : EXPRESSION
+			| EXPRESSION_LIST ',' EXPRESSION
+			
 EXPRESSION	: TERM
 			| EXPRESSION '+' TERM 	
 	{
@@ -181,6 +191,7 @@ FACTOR		: INT
 	{
 		gen_intvar($1);
 	}
+			| FUNC_CALL
 			| '(' EXPRESSION ')'
 			| '-' FACTOR
 	{
