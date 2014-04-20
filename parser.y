@@ -25,7 +25,7 @@ int yywrap(void) {
 
 %%
 
-S			: FUNCTION	
+S			: FUNCTION_LIST
 	{
 		return(0);
 	}
@@ -33,6 +33,9 @@ S			: FUNCTION
 
 FUNCTION		: TYPE_INT IDENT '(' ')' BLOC
 				| TYPE_INT IDENT '(' VARIABLE_LIST ')' BLOC
+
+FUNCTION_LIST : FUNCTION
+			| FUNCTION_LIST FUNCTION
 
 BLOC			: '{' '}'
 			| '{' STATEMENT_LIST '}'
