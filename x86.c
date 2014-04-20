@@ -249,11 +249,12 @@ void gen_callresult() {
 
 int main()
 {
-  printf(section_text);
-  strcpy(data_buf, section_data);
+  strcpy(data_buf, section_text);
+  strcat(data_buf, section_data);
   strcpy(code_buf, proc_dump32);
   strcat(code_buf, proc_main);
-  yyparse();
+  if (yyparse())
+    return 1;
   printf("%s\n",data_buf);
   printf("%s\n",code_buf);
   return 0;
