@@ -50,6 +50,11 @@ FACTOR		: INT
 	{
 		printf(" %d",$1);
 	}
+			| '(' EXPRESSION ')'
+			| '-' FACTOR
+	{
+		printf(" 0 1 - *");
+	}
 ;
 
 %%
