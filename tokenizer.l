@@ -1,4 +1,6 @@
 %{
+#include <stdio.h>
+#include <string.h>
 #include "y.tab.h"
 %}
 
@@ -31,6 +33,7 @@ return		{
 			}
 
 [a-zA-Z_][0-9a-zA-Z_]* {
+				yylval.identifier = strdup(yytext);
 				return(IDENT);
 			}
 
