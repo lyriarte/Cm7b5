@@ -101,7 +101,7 @@ void gen_intvar(char * name) {
     }
     sprintf(temp_buf,"    push dword [ebp+%02d] ; %s\n", 4*(argtop-i+2), name);
   } 
-  free(name);
+  //free(name);
   strcat(code_buf, temp_buf);
 };
 
@@ -117,7 +117,7 @@ void assign_intvar(char * name) {
     }
     sprintf(temp_buf,"    pop dword [ebp+%02d] ; %s\n", 4*(argtop-i+2), name);
   } 
-  free(name);
+  //free(name);
   strcat(code_buf, temp_buf);
 };
 
@@ -220,11 +220,13 @@ void begin_func(char * name) {
 void end_func() {
   int i;
   sprintf(temp_buf,"function_%s_end:\n", current_function);
+/*
   free(current_function);
   for (i=0; i<vartop; i++)
     free(varstack[i]);
   for (i=0; i<argtop; i++)
     free(argstack[i]);
+*/
   strcat(code_buf, temp_buf);
 //strcat(code_buf, "    pop  esi\n");
 //strcat(code_buf, "    pop  edi\n");
