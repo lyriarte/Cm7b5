@@ -3,6 +3,9 @@ image: debian:bookworm
 stages:
   - build
 
+before_script:
+  - apt-get update && apt-get install -y gcc flex bison make
+
 build:
   stage: build
   script:
