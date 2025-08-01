@@ -2,6 +2,7 @@ image: debian:bookworm
 
 stages:
   - build
+  - test
 
 before_script:
   - apt-get update && apt-get install -y gcc flex bison make
@@ -13,3 +14,13 @@ build:
   artifacts:
     paths:
       - compiler
+
+test:
+  stage: test
+  script:
+    - echo "Iterative fibonacci"
+    - cat fib1.c | ./compiler > fib1.asm
+    - [ "$(md5sum fib1.asm)" = "5d651d5afe1ca87af7633e570bec1aac  fib1.asm" ]
+    - echo "Recursive fibonacci"
+    - cat fib2.c | ./compiler > fib2.asm
+    - [ "$(md5sum fib2.asm)" = "0c09744dfffc7fa49336d7c16759ecde  fib2.asm" ]
