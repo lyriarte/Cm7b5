@@ -12,14 +12,6 @@ int fibonacci(int n)
 		return n;
 	}
 	else {
-		int i;
-		i = 1;
-		while (i < n) {
-			fib = fib0 + fib1;
-			fib0 = fib1;
-			fib1 = fib;
-			i = i + 1;
-		}
 	}
 	return fib;
 }
