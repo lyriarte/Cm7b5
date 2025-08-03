@@ -21,6 +21,12 @@ test:
     - echo "Iterative fibonacci"
     - cat fib1.c | ./compiler > fib1.asm
     - test "$(md5sum fib1.asm)" = "5d651d5afe1ca87af7633e570bec1aac  fib1.asm"
+    - yasm -f elf fib1.asm
+    - ld -m elf_i386 -s -o fib1.bin fib1.o
+    - test "$(./fib1.bin)" = "00000008"
     - echo "Recursive fibonacci"
     - cat fib2.c | ./compiler > fib2.asm
     - test "$(md5sum fib2.asm)" = "0c09744dfffc7fa49336d7c16759ecde  fib2.asm"
+    - yasm -f elf fib2.asm
+    - ld -m elf_i386 -s -o fib2.bin fib2.o
+    - test "$(./fib2.bin)" = "00000008"
