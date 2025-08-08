@@ -30,3 +30,7 @@ test:
     - yasm -f elf fib2.asm
     - ld -m elf_i386 -s -o fib2.bin fib2.o
     - test "$(./fib2.bin)" = "00000008"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'  
+
