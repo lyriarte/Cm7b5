@@ -11,6 +11,9 @@ build:
   stage: build
   script:
     - make
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'  
   artifacts:
     paths:
       - compiler
@@ -33,4 +36,11 @@ test:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'  
+  artifacts:
+    paths:
+      - fib1.asm
+      - fib1.bin
+      - fib2.asm
+      - fib2.bin
+
 
