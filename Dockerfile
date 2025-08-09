@@ -13,7 +13,8 @@ COPY lighttpd.conf /etc/lighttpd/lighttpd.conf
 # Copy static site & CGI
 COPY www /var/www/
 COPY cgi-bin /var/www/cgi-bin
-RUN chmod +x /var/www/cgi-bin/*.sh
+COPY compiler /var/www/cgi-bin
+RUN chmod +x /var/www/cgi-bin/*
 
 EXPOSE 8080
 
