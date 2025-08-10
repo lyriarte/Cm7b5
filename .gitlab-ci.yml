@@ -3,6 +3,10 @@ image: debian:bookworm
 stages:
   - build
   - test
+  - publish
+
+variables:
+  DOCKER_IMAGE: registry.gitlab.com/lyriarte/cm7b5:latest
 
 before_script:
   - apt-get update && apt-get install -y gcc flex bison make yasm
@@ -43,4 +47,16 @@ test:
       - fib2.asm
       - fib2.bin
 
+publish:
+  stage: publish
+  image: docker:24.0.5
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $DOCKER_IMAGE .
+    - docker push $DOCKER_IMAGE
+  only:
+    - main
 
