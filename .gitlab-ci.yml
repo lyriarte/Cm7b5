@@ -3,7 +3,7 @@ image: debian:bookworm
 stages:
   - build
   - test
-  - publish
+  - deploy
 
 variables:
   DOCKER_IMAGE: registry.gitlab.com/lyriarte/cm7b5:latest
@@ -48,7 +48,7 @@ test:
       - fib2.bin
 
 publish:
-  stage: publish
+  stage: deploy
   image: docker:24.0.5
   services:
     - docker:dind
